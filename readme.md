@@ -7,3 +7,5 @@ It's useful for designers and people who just need to know what color a pixel is
 # Demo
 
 ![Demo](demo.png)
+
+[Click here to access it](https://grossato.com.br/html5-image-color-picker/)
