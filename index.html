@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<body>
+    <h1>Paste Image Color Picker</h1>
+    <p>Simple online page to paste images and read their pixels</p>
+<script>
+window.addEventListener("load", () => {
+    const pre = document.querySelector("pre") || document.createElement("pre");
+    pre.innerText = "Paste image into this page to load it";
+    if (!pre.parentNode) {
+        document.body.appendChild(pre);
+    }
+
+    document.body.onpaste = ev => {
+
+        const file = ev.clipboardData.items[0].getAsFile();
+        if (!file) { return console.log("No file"); }
+
+        const img = document.querySelector("img") || document.createElement("img");
+        img.style.display = "block";
+
+        const canvas = document.querySelector("canvas") || document.createElement("canvas");
+        canvas.style.display = "none";
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        if (!img.parentNode) {
+            document.body.appendChild(img);
+            img.onload = function() {
+                if (!canvas.parentNode) {
+                    canvas.onmousemove = function(event) {
+                        if (event.shiftKey || event.ctrlKey) {
+                            return;
+                        }
+                        const rect = canvas.getBoundingClientRect();
+                        const [x, y] = [event.clientX - rect.left, event.clientY - rect.top].map(value => Math.floor(value));
+                        const id = (x + y * canvas.width) << 2;
+                        pre.innerText = (
+                            `${x},${y}\n` +
+                            `rgb(${window.currentData.data.length > id ? `${window.currentData.data[id]},${window.currentData.data[id+1]},${window.currentData.data[id+2]},${window.currentData.data[id+3]})\n` +
+                            `#${window.currentData.data[id].toString(16).padStart(2, "0").toUpperCase()}${window.currentData.data[id+1].toString(16).padStart(2, "0").toUpperCase()}${window.currentData.data[id+2].toString(16).padStart(2, "0").toUpperCase()}` : null}`
+                        );
+                    }
+                    document.body.appendChild(canvas);
+                }
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                img.style.display = "none";
+                canvas.style.display = "block";
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                window.currentData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            }
+        } else {
+            console.log("Updated");
+        }
+    }
+});
+</script>
+</body>
